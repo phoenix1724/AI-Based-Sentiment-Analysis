@@ -1,0 +1,18 @@
+# Git and documentation
+.git/
+.gitignore
+PRD.md
+README.md
+walkthrough.md
+task.md
+
+# Python caches and environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Project temporary outputs
+temp_exports/

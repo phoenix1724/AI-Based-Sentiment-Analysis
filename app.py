@@ -16,8 +16,11 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Ensure temporary exports directory exists within the workspace
-EXPORT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_exports")
+# Ensure temporary exports directory exists (uses /tmp on Vercel's read-only serverless filesystem)
+if os.environ.get("VERCEL") == "1" or os.environ.get("VERCEL_ENV") is not None:
+    EXPORT_DIR = "/tmp"
+else:
+    EXPORT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_exports")
 os.makedirs(EXPORT_DIR, exist_ok=True)
 
 # Define request schema for single text analysis

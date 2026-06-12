@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Sentiment Analysis Dashboard — 2026</title>
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo-container">
+            <div class="logo-icon">SA</div>
+            <div class="logo-text">Sentiment.AI</div>
+        </div>
+        
+        <ul class="nav-links">
+            <li>
+                <a href="#dashboard" class="nav-item active" data-target="dashboard-page">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="#sandbox" class="nav-item" data-target="sandbox-page">
+                    <i class="fa-solid fa-keyboard"></i>
+                    <span>Real-time Sandbox</span>
+                </a>
+            </li>
+            <li>
+                <a href="#bulk" class="nav-item" data-target="bulk-page">
+                    <i class="fa-solid fa-file-csv"></i>
+                    <span>Bulk CSV Upload</span>
+                </a>
+            </li>
+            <li>
+                <a href="#model" class="nav-item" data-target="model-page">
+                    <i class="fa-solid fa-gears"></i>
+                    <span>Model Details</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <p>Mini Project — 2026</p>
+            <p class="version">v1.0.0 (FastAPI + ML)</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Header -->
+        <header>
+            <div>
+                <h1 id="page-title">Analytics Dashboard</h1>
+                <p class="header-meta">Textual Customer Feedback Classification & Analytics</p>
+            </div>
+            <div id="connection-status" class="alert-info-box" style="padding: 0.5rem 1rem; margin: 0;">
+                <i class="fa-solid fa-circle-check" style="color: var(--positive);"></i>
+                <span style="color: var(--text-primary); font-size: 0.8rem;">API Connected</span>
+            </div>
+        </header>
+
+        <!-- 1. DASHBOARD VIEW -->
+        <section id="dashboard-page" class="view-page active">
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="card stat-card">
+                    <span class="stat-label">Total Analyzed</span>
+                    <span class="stat-value" id="dash-total">0</span>
+                    <span class="stat-change">Total reviews processed</span>
+                </div>
+                <div class="card stat-card pos-border">
+                    <span class="stat-label">Positive Feedback</span>
+                    <span class="stat-value" id="dash-pos">0%</span>
+                    <span class="stat-change" style="color: var(--positive);"><i class="fa-solid fa-arrow-trend-up"></i> Positive sentiment share</span>
+                </div>
+                <div class="card stat-card neu-border">
+                    <span class="stat-label">Neutral Feedback</span>
+                    <span class="stat-value" id="dash-neu">0%</span>
+                    <span class="stat-change" style="color: var(--neutral);"><i class="fa-solid fa-arrows-left-right"></i> Neutral sentiment share</span>
+                </div>
+                <div class="card stat-card neg-border">
+                    <span class="stat-label">Negative Feedback</span>
+                    <span class="stat-value" id="dash-neg">0%</span>
+                    <span class="stat-change" style="color: var(--negative);"><i class="fa-solid fa-arrow-trend-down"></i> User concerns share</span>
+                </div>
+            </div>
+
+            <!-- Dashboard Charts -->
+            <div class="charts-grid">
+                <!-- Doughnut Chart -->
+                <div class="card">
+                    <div class="chart-title">
+                        <span>Sentiment Distribution</span>
+                        <i class="fa-solid fa-chart-donut text-secondary"></i>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="distribution-chart"></canvas>
+                    </div>
+                </div>
+                <!-- Satisfaction Score Gauge -->
+                <div class="card" style="display: flex; flex-direction: column;">
+                    <div class="chart-title">
+                        <span>Satisfaction Index</span>
+                        <i class="fa-solid fa-gauge"></i>
+                    </div>
+                    <div class="chart-wrapper" style="flex: 1; height: 180px;">
+                        <canvas id="satisfaction-gauge"></canvas>
+                    </div>
+                    <div style="text-align: center; margin-top: auto; padding-top: 1rem;">
+                        <h3 style="font-size: 1.5rem;" id="sat-score-val">0.00</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">Range: -1.00 (Extremely Dissatisfied) to +1.00 (Extremely Satisfied)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keyword frequency breakdown -->
+            <div class="card">
+                <div class="chart-title">
+                    <span>Key Words & Customer Patterns</span>
+                    <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-secondary);">Top Preprocessed Unigrams/Bigrams</span>
+                </div>
+                <div class="keyword-lists">
+                    <div>
+                        <h4 style="color: var(--positive); margin-bottom: 1rem; font-size: 0.95rem;"><i class="fa-solid fa-face-smile"></i> Top Positive Driver Words</h4>
+                        <div class="word-bar-container" id="pos-word-list">
+                            <div style="color: var(--text-secondary); font-size: 0.875rem;">No data loaded. Clean some text in the Sandbox or Upload a CSV spreadsheet!</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--negative); margin-bottom: 1rem; font-size: 0.95rem;"><i class="fa-solid fa-face-frown"></i> Top User Concern Words (Negative)</h4>
+                        <div class="word-bar-container" id="neg-word-list">
+                            <div style="color: var(--text-secondary); font-size: 0.875rem;">No data loaded. Clean some text in the Sandbox or Upload a CSV spreadsheet!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Alert -->
+            <div class="alert-info-box" style="margin-top: 1.5rem;">
+                <i class="fa-solid fa-circle-info"></i>
+                <div>
+                    <strong>Getting Started:</strong> Try typing reviews in the <strong>Real-time Sandbox</strong> tab to see how text is tokenized, or download the template <a href="data/sample_feedback.csv" download style="color: var(--primary-accent); font-weight: 500; text-decoration: underline;">sample_feedback.csv</a> and upload it in the <strong>Bulk CSV Upload</strong> tab to test data aggregation.
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. REAL-TIME SANDBOX VIEW -->
+        <section id="sandbox-page" class="view-page">
+            <div class="sandbox-layout">
+                <!-- Input Panel -->
+                <div class="sandbox-input-area">
+                    <div class="card" style="flex: 1; display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="chart-title" style="margin-bottom: 0.5rem;">
+                            <span>Customer Feedback Input</span>
+                            <span id="char-count" style="font-size: 0.8rem; color: var(--text-secondary);">0 characters</span>
+                        </div>
+                        <textarea id="sandbox-text" class="nlp-input" placeholder="Type customer feedback here... (e.g., 'The UI dashboard is incredibly clean, but the loading speed is slightly slow during upload.')"></textarea>
+                        
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-top: auto;">
+                            <button id="btn-clear-sandbox" class="nav-item" style="border: 1px solid var(--card-border); background: transparent; padding: 0.5rem 1rem; border-radius: 8px;">
+                                Clear Input
+                            </button>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">
+                                <i class="fa-solid fa-bolt"></i> Real-time analysis active
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Preprocessing Step visualizer -->
+                    <div class="card">
+                        <div class="chart-title">
+                            <span>NLP Preprocessing Trace</span>
+                            <i class="fa-solid fa-filter"></i>
+                        </div>
+                        <div class="pipeline-table-container">
+                            <table class="pipeline-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 25%;">Preprocessing Stage</th>
+                                        <th>Output State</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="step-badge">1. Lowercase</span></td>
+                                        <td id="step-lower" style="font-family: monospace; color: var(--text-secondary);">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="step-badge">2. Tokenized</span></td>
+                                        <td id="step-tokens" style="font-family: monospace; color: var(--text-secondary);">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="step-badge">3. Clean Punct</span></td>
+                                        <td id="step-nopunct" style="font-family: monospace; color: var(--text-secondary);">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="step-badge">4. Stopwords Out</span></td>
+                                        <td id="step-nostop" style="font-family: monospace; color: var(--text-secondary);">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="step-badge">5. Lemmatized</span></td>
+                                        <td id="step-lemma" style="font-weight: 600; color: var(--primary-accent);">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Results Panel -->
+                <div class="sandbox-results">
+                    <!-- Twin Model Gauges -->
+                    <div class="gauges-container">
+                        <!-- VADER Rule-Based -->
+                        <div class="card gauge-card">
+                            <div class="gauge-header">VADER Lexicon Model</div>
+                            <div style="position: relative; width: 100%; height: 100px; display: flex; justify-content: center; align-items: center;">
+                                <canvas id="vader-gauge"></canvas>
+                            </div>
+                            <div class="gauge-value" id="vader-compound-val">0.00</div>
+                            <span id="vader-badge" class="sentiment-badge neu">Neutral</span>
+                        </div>
+                        <!-- Scikit-Learn Logistic Regression -->
+                        <div class="card gauge-card">
+                            <div class="gauge-header">Logistic Regression ML</div>
+                            <div style="position: relative; width: 100%; height: 100px; display: flex; justify-content: center; align-items: center;">
+                                <canvas id="ml-gauge"></canvas>
+                            </div>
+                            <div class="gauge-value" id="ml-confidence-val">0%</div>
+                            <span id="ml-badge" class="sentiment-badge neu">Neutral</span>
+                        </div>
+                    </div>
+
+                    <!-- ML Probability bar chart -->
+                    <div class="card">
+                        <div class="chart-title">
+                            <span>ML Model Classification Confidence</span>
+                            <i class="fa-solid fa-chart-simple"></i>
+                        </div>
+                        <div class="chart-wrapper" style="height: 180px;">
+                            <canvas id="ml-probs-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. BULK CSV UPLOAD VIEW -->
+        <section id="bulk-page" class="view-page">
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="chart-title">
+                    <span>Spreadsheet Analysis Setup</span>
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                
+                <!-- Drag and drop zone -->
+                <div id="drop-zone" class="upload-container">
+                    <i class="fa-solid fa-file-excel upload-icon"></i>
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem;">Drag and drop your customer feedback CSV here</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem;">Only .csv files are supported. File headers will be auto-detected.</p>
+                    </div>
+                    <button class="btn-upload" onclick="document.getElementById('csv-file-input').click()">Browse Local Files</button>
+                    <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                </div>
+
+                <div id="file-info-bar" style="display: none; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--card-border); margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fa-solid fa-file-csv" style="color: var(--primary-accent); font-size: 1.5rem;"></i>
+                        <div>
+                            <span id="file-name" style="font-weight: 600; font-size: 0.95rem;">feedback.csv</span>
+                            <span id="file-size" style="font-size: 0.8rem; color: var(--text-secondary); margin-left: 0.5rem;">(4.2 KB)</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-circle-xmark" id="btn-remove-file" style="cursor: pointer; color: var(--text-secondary); font-size: 1.25rem;" title="Remove File"></i>
+                </div>
+
+                <!-- Column Configuration -->
+                <div id="column-config-panel" class="config-panel" style="display: none;">
+                    <div class="form-group">
+                        <label for="csv-text-column">Select column containing Feedback Text:</label>
+                        <select id="csv-text-column" class="form-select">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    
+                    <button id="btn-process-bulk" class="btn-upload" style="background: var(--secondary-gradient); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); margin-top: 0.5rem;">
+                        <i class="fa-solid fa-play"></i> Run Sentiment Analysis
+                    </button>
+                </div>
+
+                <!-- Progress bar -->
+                <div id="bulk-progress-wrapper" class="progress-bar-wrapper">
+                    <div id="bulk-progress" class="progress-bar"></div>
+                </div>
+            </div>
+
+            <!-- Upload Results (hidden initially) -->
+            <div id="bulk-results-section" style="display: none;">
+                <!-- Bulk stats grid -->
+                <div class="stats-grid">
+                    <div class="card stat-card">
+                        <span class="stat-label">Dataset Records</span>
+                        <span class="stat-value" id="bulk-total">0</span>
+                        <span class="stat-change">Processed successfully</span>
+                    </div>
+                    <div class="card stat-card pos-border">
+                        <span class="stat-label">Positive Feedback</span>
+                        <span class="stat-value" id="bulk-pos">0%</span>
+                        <span class="stat-change" id="bulk-pos-count">0 reviews</span>
+                    </div>
+                    <div class="card stat-card neg-border">
+                        <span class="stat-label">Negative Concerns</span>
+                        <span class="stat-value" id="bulk-neg">0%</span>
+                        <span class="stat-change" id="bulk-neg-count">0 reviews</span>
+                    </div>
+                    <div class="card stat-card">
+                        <span class="stat-label">Satisfaction Score</span>
+                        <span class="stat-value" id="bulk-score">0.00</span>
+                        <span class="stat-change" id="bulk-agreement-rate">Model Agreement: 0%</span>
+                    </div>
+                </div>
+
+                <!-- Graphs and Downloads -->
+                <div class="charts-grid" style="grid-template-columns: 2fr 3fr;">
+                    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; align-items: center; gap: 1rem;">
+                        <div class="chart-title" style="align-self: flex-start; width: 100%;">
+                            <span>Batch Summary Chart</span>
+                        </div>
+                        <div style="position: relative; width: 100%; height: 200px; display: flex; justify-content: center; align-items: center;">
+                            <canvas id="bulk-dist-chart"></canvas>
+                        </div>
+                        <a id="btn-download-results" href="#" class="btn-export" style="width: 100%; text-align: center; justify-content: center;">
+                            <i class="fa-solid fa-cloud-arrow-down"></i> Export Labeled CSV File
+                        </a>
+                    </div>
+
+                    <div class="card">
+                        <div class="chart-title">
+                            <span>Batch Top Keywords & Driver Terms</span>
+                        </div>
+                        <div class="keyword-lists">
+                            <div>
+                                <h4 style="color: var(--positive); margin-bottom: 0.75rem; font-size: 0.9rem;">Positive Drivers</h4>
+                                <div class="word-bar-container" id="bulk-pos-words">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--negative); margin-bottom: 0.75rem; font-size: 0.9rem;">Negative Concerns</h4>
+                                <div class="word-bar-container" id="bulk-neg-words">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview table -->
+                <div class="card table-preview-card">
+                    <div class="chart-title" style="margin-bottom: 0;">
+                        <span>Dataset Processing Output Preview (Top 100 Rows)</span>
+                        <i class="fa-solid fa-table"></i>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="bulk-preview-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%;">Feedback Review</th>
+                                    <th>VADER Compound</th>
+                                    <th>VADER Sentiment</th>
+                                    <th>ML Sentiment</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. MODEL DETAILS VIEW -->
+        <section id="model-page" class="view-page">
+            <div class="card">
+                <div class="model-header">
+                    <div>
+                        <span class="model-title">Logistic Regression Classifier (Scikit-Learn)</span>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                            Algorithm: Logistic Regression (L2 Penalty) | Tokenizer: TF-IDF Vectorizer (1-2 N-grams)
+                        </p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Model Validation Accuracy</span>
+                        <h2 style="color: var(--positive); font-size: 2rem;" id="model-accuracy">0%</h2>
+                    </div>
+                </div>
+
+                <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.5rem;">
+                    <div class="card" style="padding: 1rem; border-color: var(--card-border);">
+                        <span class="stat-label" style="font-size: 0.75rem;">Training Samples</span>
+                        <span style="font-size: 1.25rem; font-weight: 700;" id="model-samples">80</span>
+                    </div>
+                    <div class="card" style="padding: 1rem; border-color: var(--card-border);">
+                        <span class="stat-label" style="font-size: 0.75rem;">Classification Classes</span>
+                        <span style="font-size: 1.25rem; font-weight: 700;" id="model-classes">3 (Pos, Neu, Neg)</span>
+                    </div>
+                    <div class="card" style="padding: 1rem; border-color: var(--card-border);">
+                        <span class="stat-label" style="font-size: 0.75rem;">Vectorizer Setup</span>
+                        <span style="font-size: 1.15rem; font-weight: 700; color: var(--primary-accent);">TF-IDF (Bi-grams)</span>
+                    </div>
+                </div>
+
+                <h3 style="font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem;">Coefficient Weights (Top Predictive Keywords)</h3>
+                <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    The table below shows the words that have the highest mathematical weights (coefficients) inside the trained Logistic Regression model. Larger weights indicate a stronger influence towards classifying text into that specific sentiment label.
+                </p>
+
+                <!-- Model features weights layout -->
+                <div class="features-grid" id="model-features-container">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Chart.js Library from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Frontend logic Script -->
+    <script src="script.js"></script>
+</body>
+</html>

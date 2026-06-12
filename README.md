@@ -1,5 +1,7 @@
 # AI-Based Sentiment Analysis Dashboard (Mini Project) — 2026
 
+🚀 **Live Deployment Demo:** [https://ai-based-sentiment-analysis-1.onrender.com/](https://ai-based-sentiment-analysis-1.onrender.com/)
+
 An interactive, high-fidelity customer feedback analytics dashboard. This application leverages a hybrid Natural Language Processing (NLP) pipeline—combining lexicon-based sentiment analysis (**VADER**) and a tuned classical machine learning model (**TF-IDF + Logistic Regression**)—to classify textual feedback (Positive, Neutral, Negative) and identify actionable user concerns.
 
 Served via **FastAPI** with a modern, dark-themed **glassmorphism** web interface.
